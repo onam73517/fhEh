@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>진접 로또 추첨기</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1 style="color: blue;">진접 로또 추첨기</h1>
+        <div class="lotto-machine">
+            <div class="ball-outlet"></div>
+            <div id="message" class="message-area"></div>
+        </div>
+        <div class="drawn-numbers" id="drawnNumbers">
+            </div>
+        <div class="button-group">
+            <button id="drawBtn">추첨하기</button>
+            <button id="retryBtn" style="display: none;">다시 추첨하기</button>
+        </div>
+        <div id="luckMessage" style="display: none; color: red;">행운을 빕니다!</div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

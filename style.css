@@ -1,0 +1,254 @@
+body {
+    font-family: 'Arial', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #f4f4f4;
+    margin: 0;
+    overflow-x: hidden; /* 가로 스크롤 방지 */
+}
+
+.container {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    width: 90%;
+    max-width: 450px;
+    box-sizing: border-box;
+}
+
+h1 {
+    margin-bottom: 20px;
+    font-size: 1.8em;
+}
+
+.lotto-machine {
+    position: relative;
+    width: 250px;
+    height: 250px;
+    background-color: #FFFFAA;
+    border-radius: 50%;
+    margin: 20px auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+    border: 2px solid #ccc;
+    box-sizing: border-box;
+    overflow: visible;
+}
+
+.ball-outlet {
+    width: 45px;
+    height: 55px;
+    background-color: #bbb;
+    border-radius: 5px;
+    position: absolute;
+    bottom: -2px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+/* 추첨 공 (애니메이션 중인 공) */
+.ball {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    color: white;
+    font-weight: bold;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    opacity: 1;
+    z-index: 10;
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+}
+
+/* 공 색상 클래스 (10단위별) */
+.ball.color-0 { background-color: #FF6347; }
+.ball.color-1 { background-color: #3CB371; }
+.ball.color-2 { background-color: #4169E1; }
+.ball.color-3 { background-color: #FFD700; }
+.ball.color-4 { background-color: #8A2BE2; }
+
+
+/* 공이 출구에서 나와 최종 위치로 이동하는 애니메이션 */
+@keyframes comeOutAndPlace {
+    0% {
+        top: calc(100% - 45px); /* 출구 위치 */
+        left: 50%;
+        transform: translateX(-50%);
+        opacity: 0; /* 처음에는 투명하게 시작 */
+    }
+    10% {
+        opacity: 1; /* 빠르게 나타남 */
+    }
+    100% {
+        top: calc(100% + 50px); /* 원통 아래로 이동 (화면 밖으로 이동) */
+        left: var(--final-left-pos); /* JS에서 설정할 최종 left 위치 */
+        transform: translateX(-50%) scale(0.9); /* 약간 작게 */
+        opacity: 0; /* 애니메이션 끝날 때 사라지도록 */
+    }
+}
+
+
+.message-area {
+    position: absolute;
+    top: 50%; /* 원통 중앙에 위치하도록 */
+    left: 50%;
+    transform: translate(-50%, -50%);
+    /* font-size를 약간 줄여서 두 줄에 들어갈 공간 확보 */
+    font-size: 1.25em; /* 1.3em에서 약간 줄임 */
+    font-weight: bold;
+    color: navy;
+    opacity: 1; /* 항상 보이도록 opacity 1로 설정 */
+    white-space: pre-wrap; /* 줄바꿈 적용 */
+    text-align: center;
+    
+    /* width를 명시하여 줄바꿈을 제어하고 max-width 제거 */
+    width: 90%; /* 원통 너비의 90% 정도 사용 */
+    box-sizing: border-box; /* 패딩 포함 */
+    
+    line-height: 1.3; /* 줄 간격을 약간 줄여서 두 줄에 보기 좋게 만듦 */
+}
+
+/* 메시지 전체에 적용되는 페이드 인 애니메이션 (더 이상 사용되지 않음) */
+/*
+@keyframes fadeInMessage {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+}
+*/
+
+
+.button-group {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+button {
+    background-color: #4CAF50;
+    color: white;
+    padding: 12px 25px;
+    border: none;
+    border-radius: 5px;
+    font-size: 1.1em;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    flex-shrink: 0;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+/* 추첨 완료 후 번호들이 표시될 컨테이너 */
+.drawn-numbers {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    min-height: 70px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    gap: 10px;
+    position: relative;
+    z-index: 1;
+}
+
+/* 하단에 배치될 추첨 번호 (새로 생성되는 요소) */
+.number-circle {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.5em;
+    font-weight: bold;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    color: #fff;
+    flex-shrink: 0;
+    /* 페이드 인 애니메이션 */
+    animation: fadeIn 0.3s ease-out forwards;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.8); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+
+/* 추첨된 번호의 색상 (10단위별) */
+.number-circle.color-0 { background-color: #FF6347; }
+.number-circle.color-1 { background-color: #3CB371; }
+.number-circle.color-2 { background-color: #4169E1; }
+.number-circle.color-3 { background-color: #FFD700; }
+.number-circle.color-4 { background-color: #8A2BE2; }
+
+
+#luckMessage {
+    margin-top: 10px;
+    font-style: italic;
+    font-weight: bold;
+    font-size: 1.1em;
+}
+
+/* 반응형 디자인 (Media Queries) */
+@media (max-width: 600px) {
+    .container {
+        padding: 15px;
+        width: 95%;
+    }
+
+    h1 {
+        font-size: 1.6em;
+    }
+
+    .lotto-machine {
+        width: 220px;
+        height: 220px;
+    }
+
+    .ball {
+        width: 40px;
+        height: 40px;
+        font-size: 1.3em;
+    }
+
+    .number-circle {
+        width: 40px;
+        height: 40px;
+        font-size: 1.3em;
+    }
+
+    .message-area {
+        font-size: 1.1em; /* 작은 화면에서 폰트 크기 조정 */
+    }
+
+    button {
+        padding: 10px 20px;
+        font-size: 1em;
+    }
+
+    .drawn-numbers {
+        margin-top: 15px;
+        margin-bottom: 15px;
+        gap: 8px;
+    }
+
+    #luckMessage {
+        font-size: 1em;
+    }
+}
