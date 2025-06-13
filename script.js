@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const retryBtn = document.getElementById('retryBtn');
     const lottoMachine = document.querySelector('.lotto-machine');
     const drawnNumbersContainer = document.getElementById('drawnNumbers');
-    const messageArea = document.getElementById('message');
+    const messageArea = document.getElementById('message'); // message-area
     const luckMessage = document.getElementById('luckMessage');
     let drawingTimeout;
     let currentDrawnNumbers = []; // 현재까지 추첨되어 표시될 번호 배열 (정렬용)
@@ -21,7 +21,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // 음성 합성이 지원되는지 확인하고 한국어 음성을 로드
     if ('speechSynthesis' in window) {
         synth = window.speechSynthesis;
-        // 음성 목록이 로드될 때까지 기다림
         synth.onvoiceschanged = () => {
             const voices = synth.getVoices();
             koreanVoice = voices.find(voice => voice.lang === 'ko-KR' || voice.lang === 'ko_KR');
@@ -32,7 +31,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.warn("한국어 음성을 찾을 수 없습니다. 기본 음성으로 대체됩니다.");
             }
         };
-        // 페이지 로드 시에도 음성 목록을 다시 불러올 수 있도록
         if (synth.getVoices().length === 0) {
             synth.onvoiceschanged();
         } else {
@@ -55,8 +53,8 @@ document.addEventListener('DOMContentLoaded', () => {
         luckMessage.style.display = 'none';
         drawnNumbersContainer.innerHTML = ''; // 하단 번호들 초기화
         messageArea.textContent = ''; // 메시지 초기화
-        messageArea.style.opacity = 0; // 메시지 초기에는 숨김
-        messageArea.style.animation = 'none'; // 메시지 애니메이션 초기화 (필요 없을 수 있지만 안전하게)
+        messageArea.style.opacity = 1; // 메시지 초기에는 보이게 (추첨 중! 표시용)
+        messageArea.classList.remove('blinking'); // 깜빡임 클래스 제거
         
         // 원통 안에 있을 수 있는 모든 애니메이션 중인 공들을 제거
         const allAnimatedBalls = lottoMachine.querySelectorAll('.ball');
@@ -73,7 +71,13 @@ document.addEventListener('DOMContentLoaded', () => {
     function startDrawing() {
         // 기존 타임아웃 및 애니메이션 클리어
         clearTimeout(drawingTimeout);
-        initializeUI(); // UI 상태 초기화
+        initializeUI(); // UI 상태 초기화 (여기서 messageArea.textContent = '' 가 됨)
+
+        // 추첨 시작 시 "추첨 중!" 텍스트 설정 및 깜빡임 애니메이션 적용
+        messageArea.textContent = "추첨 중!";
+        messageArea.classList.add('blinking');
+        messageArea.style.opacity = 1; // 깜빡임 시작 시 보이도록
+
         drawBtn.style.display = 'none'; // 추첨 시작하면 추첨하기 버튼 숨김
 
         const numbersToDraw = [];
@@ -90,9 +94,6 @@ document.addEventListener('DOMContentLoaded', () => {
         function drawNextBall() {
             if (index < numbersToDraw.length) {
                 const number = numbersToDraw[index]; // 랜덤 순서의 번호 사용
-
-                // 공이 나올 때 번호를 읽는 부분 제거 (이전과 동일)
-                // speakNumber(number); 
 
                 const ballElement = createAndAnimateBall(number); // 공 생성 및 애니메이션 시작
 
@@ -114,13 +115,14 @@ document.addEventListener('DOMContentLoaded', () => {
                         } else {
                             // 모든 공이 나온 후 최종 메시지 표시 및 버튼 변경
                             drawingTimeout = setTimeout(() => {
-                                // 모든 공이 나온 후 "당첨 번호는"이라고 말하고 번호 읽기
-                                const spokenNumbers = currentDrawnNumbers.join('번, '); // 예: "1번, 5번, 10번"
+                                messageArea.classList.remove('blinking'); // 깜빡임 애니메이션 제거
+
+                                const spokenNumbers = currentDrawnNumbers.join('번, '); 
                                 const finalNumberSpeech = `당첨 번호는 ${spokenNumbers}번 입니다!`;
 
                                 // 당첨 번호 읽기가 끝난 후, 원통 중앙 메시지 읽기 및 UI 업데이트
                                 speakText(finalNumberSpeech, 'ko-KR', 1.0, 1.0, () => {
-                                    showMessage(); // 화면에 메시지 표시
+                                    showMessage(); // 화면에 메시지 표시 (원통 중앙 텍스트 변경)
                                     speakMessage("진접 직원 여러분, 이 번호로 꼭 당첨되세요!"); // 원통 중앙 메시지 읽어주기
                                     retryBtn.style.display = 'block';
                                     luckMessage.style.display = 'block';
@@ -181,13 +183,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 메시지를 애니메이션 없이 두 줄로 표시
     function showMessage() {
-        messageArea.style.opacity = 1; // 메시지 영역을 바로 보이게 함
+        messageArea.style.opacity = 1; // 메시지 영역을 바로 보이게 함 (깜빡임 제거 후 다시 보이도록)
         // 메시지 내용을 직접 설정 (두 줄로)
         messageArea.innerHTML = "진접 직원 여러분<br>이 번호로 꼭 당첨되세요!";
     }
 
     // 특정 텍스트를 음성으로 읽어주는 함수
-    // callback 인자를 추가하여 음성 재생이 끝난 후 특정 동작을 수행하도록 함
     function speakText(text, lang = 'ko-KR', rate = 1.0, pitch = 1.0, callback) {
         if (synth && text) {
             synth.cancel(); // 현재 재생 중인 음성이 있다면 중지
@@ -198,13 +199,11 @@ document.addEventListener('DOMContentLoaded', () => {
             if (koreanVoice) {
                 utterance.voice = koreanVoice;
             }
-            // 콜백 함수가 있다면 onend 이벤트 리스너에 등록
             if (callback && typeof callback === 'function') {
                 utterance.onend = callback;
             }
             synth.speak(utterance);
         } else if (callback && typeof callback === 'function') {
-            // 음성 합성이 지원되지 않으면 즉시 콜백 실행
             callback();
         }
     }

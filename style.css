@@ -1,3 +1,16 @@
+/* 기존 CSS 내용 위에 추가하거나 적절한 위치에 삽입 */
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+}
+
+/* 메시지 영역에 적용할 클래스 */
+.message-area.blinking {
+    animation: blink 1s infinite; /* 1초 주기로 무한 반복 깜빡임 */
+}
+
+/* (이하 기존 CSS 내용) */
+
 /* HTML과 Body가 뷰포트 높이를 꽉 채우도록 설정 */
 html, body {
     height: 100%; /* HTML과 Body의 높이를 100%로 설정 */
@@ -213,7 +226,6 @@ button:hover {
     .container {
         padding: 15px;
         width: 95%;
-        /* 모바일에서는 높이를 유동적으로 조정하며, 여백을 다시 계산 */
         height: auto; /* 높이를 콘텐츠에 따라 유동적으로 */
         min-height: unset; /* 최소 높이 설정 해제 */
         margin: auto; /* 상하좌우 자동 마진으로 중앙 정렬 시도 */
