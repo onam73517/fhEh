@@ -91,8 +91,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (index < numbersToDraw.length) {
                 const number = numbersToDraw[index]; // 랜덤 순서의 번호 사용
 
-                // 공이 나올 때 번호를 읽는 부분 제거
-                // speakNumber(number);
+                // 공이 나올 때 번호를 읽는 부분 제거 (이전과 동일)
+                // speakNumber(number); 
 
                 const ballElement = createAndAnimateBall(number); // 공 생성 및 애니메이션 시작
 
@@ -116,22 +116,15 @@ document.addEventListener('DOMContentLoaded', () => {
                             drawingTimeout = setTimeout(() => {
                                 // 모든 공이 나온 후 "당첨 번호는"이라고 말하고 번호 읽기
                                 const spokenNumbers = currentDrawnNumbers.join('번, '); // 예: "1번, 5번, 10번"
-                                speakText(`당첨 번호는 ${spokenNumbers}번 입니다!`);
+                                const finalNumberSpeech = `당첨 번호는 ${spokenNumbers}번 입니다!`;
 
-                                // 번호 읽기가 끝난 후 메시지 표시 및 메시지 읽기
-                                const messageUtterance = new SpeechSynthesisUtterance(`당첨 번호는 ${spokenNumbers}번 입니다!`);
-                                messageUtterance.lang = 'ko-KR';
-                                if (koreanVoice) {
-                                    messageUtterance.voice = koreanVoice;
-                                }
-                                messageUtterance.onend = () => {
+                                // 당첨 번호 읽기가 끝난 후, 원통 중앙 메시지 읽기 및 UI 업데이트
+                                speakText(finalNumberSpeech, 'ko-KR', 1.0, 1.0, () => {
                                     showMessage(); // 화면에 메시지 표시
                                     speakMessage("진접 직원 여러분, 이 번호로 꼭 당첨되세요!"); // 원통 중앙 메시지 읽어주기
                                     retryBtn.style.display = 'block';
                                     luckMessage.style.display = 'block';
-                                };
-                                synth.speak(messageUtterance);
-
+                                });
                             }, 500); // 메시지 표시 전 약간의 딜레이
                         }
                     }
@@ -194,6 +187,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // 특정 텍스트를 음성으로 읽어주는 함수
+    // callback 인자를 추가하여 음성 재생이 끝난 후 특정 동작을 수행하도록 함
     function speakText(text, lang = 'ko-KR', rate = 1.0, pitch = 1.0, callback) {
         if (synth && text) {
             synth.cancel(); // 현재 재생 중인 음성이 있다면 중지
@@ -204,18 +198,19 @@ document.addEventListener('DOMContentLoaded', () => {
             if (koreanVoice) {
                 utterance.voice = koreanVoice;
             }
-            if (callback) {
+            // 콜백 함수가 있다면 onend 이벤트 리스너에 등록
+            if (callback && typeof callback === 'function') {
                 utterance.onend = callback;
             }
             synth.speak(utterance);
-        } else if (callback) {
+        } else if (callback && typeof callback === 'function') {
             // 음성 합성이 지원되지 않으면 즉시 콜백 실행
             callback();
         }
     }
 
-    // 최종 메시지를 한국어로 읽어주는 함수
+    // 최종 메시지를 한국어로 읽어주는 함수 (내부적으로 speakText 호출)
     function speakMessage(message) {
-        speakText(message, 'ko-KR', 1.0, 1.0); // 메시지는 기본 속도로 읽기
+        speakText(message, 'ko-KR', 1.0, 1.0);
     }
 });
