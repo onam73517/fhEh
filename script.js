@@ -53,7 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
         luckMessage.style.display = 'none';
         drawnNumbersContainer.innerHTML = ''; // 하단 번호들 초기화
         messageArea.textContent = ''; // 메시지 초기화
-        messageArea.style.opacity = 1; // 메시지 초기에는 보이게 (추첨 중! 표시용)
+        messageArea.style.opacity = 0; // 메시지 초기에는 숨김 (명확히)
         messageArea.classList.remove('blinking'); // 깜빡임 클래스 제거
         
         // 원통 안에 있을 수 있는 모든 애니메이션 중인 공들을 제거
@@ -112,13 +112,15 @@ document.addEventListener('DOMContentLoaded', () => {
                         } else {
                             // 모든 공이 나온 후 최종 메시지 표시 및 버튼 변경
                             drawingTimeout = setTimeout(() => {
-                                messageArea.classList.remove('blinking'); // 깜빡임 애니메이션 제거
-                                messageArea.textContent = ''; // "추첨 중!" 글자 비우기
+                                // "추첨 중!" 글자 제거 및 깜빡임 중지
+                                messageArea.classList.remove('blinking'); 
+                                messageArea.textContent = ''; // 텍스트 비우기
+                                messageArea.style.opacity = 0; // 완전히 투명하게 숨기기
 
                                 // 당첨 번호를 순차적으로 읽어주고 메시지 영역에 표시
                                 readDrawnNumbersSequentially(currentDrawnNumbers, () => {
                                     // 모든 번호 읽기가 끝난 후 최종 메시지 표시 및 음성 안내
-                                    showMessage(); // 화면에 메시지 표시
+                                    showMessage(); // 화면에 메시지 표시 (원통 중앙 텍스트 변경)
                                     speakMessage("진접 직원 여러분, 이 번호로 꼭 당첨되세요!"); // 원통 중앙 메시지 읽어주기
                                     retryBtn.style.display = 'block';
                                     luckMessage.style.display = 'block';
@@ -174,15 +176,13 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 메시지를 애니메이션 없이 두 줄로 표시
+    // 메시지를 애니메이션 없이 두 줄로 표시 (최종 메시지용)
     function showMessage() {
         messageArea.style.opacity = 1; 
         messageArea.innerHTML = "진접 직원 여러분<br>이 번호로 꼭 당첨되세요!";
     }
 
     // 특정 텍스트를 음성으로 읽어주는 함수
-    // onstartCallback: 음성 재생 시작 시 호출될 콜백
-    // onendCallback: 음성 재생 종료 시 호출될 콜백
     function speakText(text, lang = 'ko-KR', rate = 1.0, pitch = 1.0, onstartCallback = null, onendCallback = null) {
         if (synth && text) {
             synth.cancel(); 
@@ -194,15 +194,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 utterance.voice = koreanVoice;
             }
 
+            // 콜백이 정의되어 있을 때만 이벤트 리스너 할당
             if (onstartCallback && typeof onstartCallback === 'function') {
                 utterance.onstart = onstartCallback;
+            } else {
+                utterance.onstart = null; // 기존 리스너 제거
             }
+            
             if (onendCallback && typeof onendCallback === 'function') {
                 utterance.onend = onendCallback;
             } else {
-                // onendCallback이 없으면 기존 콜백(onend)을 제거하여 중복 실행 방지
-                utterance.onend = null;
+                utterance.onend = null; // 기존 리스너 제거
             }
+
             synth.speak(utterance);
         } else if (onendCallback && typeof onendCallback === 'function') {
             // 음성 합성이 지원되지 않으면 즉시 onend 콜백 실행
@@ -230,7 +234,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 speakText(textToSpeak, 'ko-KR', 1.0, 1.0,
                     () => { // onstart: 번호 읽기 시작 시
                         messageArea.textContent = number; // 원통 중앙에 번호 표시
-                        messageArea.style.opacity = 1;
+                        messageArea.style.opacity = 1; // 보이게 함
                     },
                     () => { // onend: 번호 읽기 종료 시
                         messageArea.textContent = ''; // 번호 사라지게 함
@@ -250,6 +254,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 최종 메시지를 한국어로 읽어주는 함수 (내부적으로 speakText 호출)
     function speakMessage(message) {
-        speakText(message, 'ko-KR', 1.0, 1.0); // 이 메시지는 원통에 표시되지 않고 음성으로만 나옴
+        // 이 메시지는 원통 중앙에 표시되는 showMessage()와는 별개로 음성으로만 나옴
+        speakText(message, 'ko-KR', 1.0, 1.0); 
     }
 });
