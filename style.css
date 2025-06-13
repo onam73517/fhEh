@@ -132,7 +132,7 @@ h1 {
     top: 50%; /* 원통 중앙에 위치하도록 */
     left: 50%;
     transform: translate(-50%, -50%);
-    font-size: 3.75em; /* 1.25em * 3 = 3.75em 으로 변경 */
+    font-size: 3.75em !important; /* 1.25em * 3 = 3.75em 으로 변경, !important 추가 */
     font-weight: bold;
     color: navy;
     /* opacity는 JS에서 제어 */
@@ -256,7 +256,7 @@ button:hover {
     }
 
     .message-area {
-        font-size: 3em; /* 모바일에서도 3배 커지도록 조정. (1.1em * 3 = 3.3em 이지만 여유롭게 3em) */
+        font-size: 3em !important; /* 모바일에서도 3배 커지도록 조정. !important 추가 */
     }
 
     button {
