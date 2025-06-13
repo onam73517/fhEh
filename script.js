@@ -98,43 +98,39 @@ document.addEventListener('DOMContentLoaded', () => {
                 const ballElement = createAndAnimateBall(number); // 공 생성 및 애니메이션 시작
 
                 ballElement.addEventListener('animationend', (event) => {
-                    // 'comeOutAndPlace' 애니메이션이 끝났을 때만 처리
                     if (event.animationName === 'comeOutAndPlace') {
-                        // 애니메이션이 끝난 공은 원통에서 제거
                         lottoMachine.removeChild(ballElement);
 
-                        // 추첨된 번호를 배열에 추가하고 정렬 후 하단에 표시
                         currentDrawnNumbers.push(number);
-                        currentDrawnNumbers.sort((a, b) => a - b); // 번호는 항상 정렬된 상태로 표시
+                        currentDrawnNumbers.sort((a, b) => a - b); 
 
-                        displaySortedDrawnNumbers(currentDrawnNumbers); // 하단에 정렬된 번호들 다시 그리기
+                        displaySortedDrawnNumbers(currentDrawnNumbers); 
 
                         index++;
                         if (index < numbersToDraw.length) {
-                            setTimeout(drawNextBall, intervalBetweenBalls); // 다음 공 추첨
+                            setTimeout(drawNextBall, intervalBetweenBalls); 
                         } else {
                             // 모든 공이 나온 후 최종 메시지 표시 및 버튼 변경
                             drawingTimeout = setTimeout(() => {
                                 messageArea.classList.remove('blinking'); // 깜빡임 애니메이션 제거
+                                messageArea.textContent = ''; // "추첨 중!" 글자 비우기
 
-                                const spokenNumbers = currentDrawnNumbers.join('번, '); 
-                                const finalNumberSpeech = `당첨 번호는 ${spokenNumbers}번 입니다!`;
-
-                                // 당첨 번호 읽기가 끝난 후, 원통 중앙 메시지 읽기 및 UI 업데이트
-                                speakText(finalNumberSpeech, 'ko-KR', 1.0, 1.0, () => {
-                                    showMessage(); // 화면에 메시지 표시 (원통 중앙 텍스트 변경)
+                                // 당첨 번호를 순차적으로 읽어주고 메시지 영역에 표시
+                                readDrawnNumbersSequentially(currentDrawnNumbers, () => {
+                                    // 모든 번호 읽기가 끝난 후 최종 메시지 표시 및 음성 안내
+                                    showMessage(); // 화면에 메시지 표시
                                     speakMessage("진접 직원 여러분, 이 번호로 꼭 당첨되세요!"); // 원통 중앙 메시지 읽어주기
                                     retryBtn.style.display = 'block';
                                     luckMessage.style.display = 'block';
                                 });
-                            }, 500); // 메시지 표시 전 약간의 딜레이
+                            }, 500); 
                         }
                     }
-                }, { once: true }); // animationend 이벤트는 한 번만 발생하도록
+                }, { once: true });
             }
         }
 
-        drawNextBall(); // 첫 번째 공 추첨 시작
+        drawNextBall();
     }
 
     // 숫자에 따른 공 색상 클래스 반환
@@ -151,31 +147,28 @@ document.addEventListener('DOMContentLoaded', () => {
     function createAndAnimateBall(number) {
         const ball = document.createElement('div');
         ball.classList.add('ball');
-        ball.classList.add(getBallColorClass(number)); // 10단위 색상 적용
+        ball.classList.add(getBallColorClass(number));
         ball.textContent = number;
 
-        // 초기 위치 설정: 원통 출구에서 바로 시작
-        ball.style.top = 'calc(100% - 45px)'; // 원통 바닥에 공이 걸쳐있는 위치
+        ball.style.top = 'calc(100% - 45px)';
         ball.style.left = '50%';
         ball.style.transform = 'translateX(-50%)';
 
-        // CSS 변수에 애니메이션 지속 시간 전달
         ball.style.setProperty('--animation-duration', `${animationDuration / 1000}s`);
 
-        // 애니메이션 시작
         ball.style.animation = `comeOutAndPlace ${animationDuration / 1000}s ease-out forwards`;
 
-        lottoMachine.appendChild(ball); // 공을 원통(lottoMachine) 안에 추가
+        lottoMachine.appendChild(ball);
         return ball;
     }
 
     // 추첨된 번호들을 하단에 정렬하여 표시하는 함수
     function displaySortedDrawnNumbers(numbers) {
-        drawnNumbersContainer.innerHTML = ''; // 기존 내용 모두 지우기
+        drawnNumbersContainer.innerHTML = '';
         numbers.forEach(number => {
             const numberCircle = document.createElement('div');
             numberCircle.classList.add('number-circle');
-            numberCircle.classList.add(getBallColorClass(number)); // 색상 적용
+            numberCircle.classList.add(getBallColorClass(number));
             numberCircle.textContent = number;
             drawnNumbersContainer.appendChild(numberCircle);
         });
@@ -183,15 +176,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 메시지를 애니메이션 없이 두 줄로 표시
     function showMessage() {
-        messageArea.style.opacity = 1; // 메시지 영역을 바로 보이게 함 (깜빡임 제거 후 다시 보이도록)
-        // 메시지 내용을 직접 설정 (두 줄로)
+        messageArea.style.opacity = 1; 
         messageArea.innerHTML = "진접 직원 여러분<br>이 번호로 꼭 당첨되세요!";
     }
 
     // 특정 텍스트를 음성으로 읽어주는 함수
-    function speakText(text, lang = 'ko-KR', rate = 1.0, pitch = 1.0, callback) {
+    // onstartCallback: 음성 재생 시작 시 호출될 콜백
+    // onendCallback: 음성 재생 종료 시 호출될 콜백
+    function speakText(text, lang = 'ko-KR', rate = 1.0, pitch = 1.0, onstartCallback = null, onendCallback = null) {
         if (synth && text) {
-            synth.cancel(); // 현재 재생 중인 음성이 있다면 중지
+            synth.cancel(); 
             const utterance = new SpeechSynthesisUtterance(text);
             utterance.lang = lang;
             utterance.rate = rate;
@@ -199,17 +193,63 @@ document.addEventListener('DOMContentLoaded', () => {
             if (koreanVoice) {
                 utterance.voice = koreanVoice;
             }
-            if (callback && typeof callback === 'function') {
-                utterance.onend = callback;
+
+            if (onstartCallback && typeof onstartCallback === 'function') {
+                utterance.onstart = onstartCallback;
+            }
+            if (onendCallback && typeof onendCallback === 'function') {
+                utterance.onend = onendCallback;
+            } else {
+                // onendCallback이 없으면 기존 콜백(onend)을 제거하여 중복 실행 방지
+                utterance.onend = null;
             }
             synth.speak(utterance);
-        } else if (callback && typeof callback === 'function') {
-            callback();
+        } else if (onendCallback && typeof onendCallback === 'function') {
+            // 음성 합성이 지원되지 않으면 즉시 onend 콜백 실행
+            onendCallback();
+        }
+    }
+
+    // 당첨 번호를 "당첨 번호는"과 함께 순차적으로 읽고 표시하는 함수
+    function readDrawnNumbersSequentially(numbers, finalCallback) {
+        let currentNumberIndex = 0;
+
+        // 첫 번째: "당첨 번호는" 읽기
+        speakText("당첨 번호는", 'ko-KR', 1.0, 1.0,
+            null, // onstart는 필요 없음
+            () => { // "당첨 번호는" 읽기가 끝난 후 실행될 콜백
+                readNextNumber();
+            }
+        );
+
+        function readNextNumber() {
+            if (currentNumberIndex < numbers.length) {
+                const number = numbers[currentNumberIndex];
+                const textToSpeak = `${number}번`;
+
+                speakText(textToSpeak, 'ko-KR', 1.0, 1.0,
+                    () => { // onstart: 번호 읽기 시작 시
+                        messageArea.textContent = number; // 원통 중앙에 번호 표시
+                        messageArea.style.opacity = 1;
+                    },
+                    () => { // onend: 번호 읽기 종료 시
+                        messageArea.textContent = ''; // 번호 사라지게 함
+                        messageArea.style.opacity = 0; // 투명하게 만듦
+                        currentNumberIndex++;
+                        setTimeout(readNextNumber, 300); // 다음 번호 읽기 (짧은 딜레이)
+                    }
+                );
+            } else {
+                // 모든 번호 읽기가 끝난 후 최종 콜백 실행
+                if (finalCallback && typeof finalCallback === 'function') {
+                    finalCallback();
+                }
+            }
         }
     }
 
     // 최종 메시지를 한국어로 읽어주는 함수 (내부적으로 speakText 호출)
     function speakMessage(message) {
-        speakText(message, 'ko-KR', 1.0, 1.0);
+        speakText(message, 'ko-KR', 1.0, 1.0); // 이 메시지는 원통에 표시되지 않고 음성으로만 나옴
     }
 });
