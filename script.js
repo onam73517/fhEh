@@ -55,7 +55,8 @@ document.addEventListener('DOMContentLoaded', () => {
         messageArea.textContent = ''; // 메시지 초기화
         messageArea.style.opacity = 0; // 메시지 초기에는 숨김 (명확히)
         messageArea.classList.remove('blinking'); // 깜빡임 클래스 제거
-        
+        messageArea.classList.remove('big-number'); // 큰 숫자 클래스도 제거
+
         // 원통 안에 있을 수 있는 모든 애니메이션 중인 공들을 제거
         const allAnimatedBalls = lottoMachine.querySelectorAll('.ball');
         allAnimatedBalls.forEach(ball => ball.remove());
@@ -180,6 +181,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function showMessage() {
         messageArea.style.opacity = 1; 
         messageArea.innerHTML = "진접 직원 여러분<br>이 번호로 꼭 당첨되세요!";
+        messageArea.classList.remove('big-number'); // 혹시 모를 경우를 대비해 클래스 제거
     }
 
     // 특정 텍스트를 음성으로 읽어주는 함수
@@ -194,22 +196,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 utterance.voice = koreanVoice;
             }
 
-            // 콜백이 정의되어 있을 때만 이벤트 리스너 할당
             if (onstartCallback && typeof onstartCallback === 'function') {
                 utterance.onstart = onstartCallback;
             } else {
-                utterance.onstart = null; // 기존 리스너 제거
+                utterance.onstart = null; 
             }
             
             if (onendCallback && typeof onendCallback === 'function') {
                 utterance.onend = onendCallback;
             } else {
-                utterance.onend = null; // 기존 리스너 제거
+                utterance.onend = null; 
             }
 
             synth.speak(utterance);
         } else if (onendCallback && typeof onendCallback === 'function') {
-            // 음성 합성이 지원되지 않으면 즉시 onend 콜백 실행
             onendCallback();
         }
     }
@@ -220,8 +220,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // 첫 번째: "당첨 번호는" 읽기
         speakText("당첨 번호는", 'ko-KR', 1.0, 1.0,
-            null, // onstart는 필요 없음
-            () => { // "당첨 번호는" 읽기가 끝난 후 실행될 콜백
+            null, 
+            () => { 
                 readNextNumber();
             }
         );
@@ -235,10 +235,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     () => { // onstart: 번호 읽기 시작 시
                         messageArea.textContent = number; // 원통 중앙에 번호 표시
                         messageArea.style.opacity = 1; // 보이게 함
+                        messageArea.classList.add('big-number'); // 큰 숫자 클래스 추가
                     },
                     () => { // onend: 번호 읽기 종료 시
                         messageArea.textContent = ''; // 번호 사라지게 함
                         messageArea.style.opacity = 0; // 투명하게 만듦
+                        messageArea.classList.remove('big-number'); // 큰 숫자 클래스 제거
                         currentNumberIndex++;
                         setTimeout(readNextNumber, 300); // 다음 번호 읽기 (짧은 딜레이)
                     }
@@ -254,7 +256,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 최종 메시지를 한국어로 읽어주는 함수 (내부적으로 speakText 호출)
     function speakMessage(message) {
-        // 이 메시지는 원통 중앙에 표시되는 showMessage()와는 별개로 음성으로만 나옴
         speakText(message, 'ko-KR', 1.0, 1.0); 
     }
 });

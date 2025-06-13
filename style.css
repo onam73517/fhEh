@@ -9,6 +9,13 @@
     animation: blink 1s infinite; /* 1초 주기로 무한 반복 깜빡임 */
 }
 
+/* 새로 추가: 당첨 번호 표시 시 사용할 큰 글씨 클래스 */
+.message-area.big-number {
+    font-size: 3.75em; /* 1.25em * 3 = 3.75em */
+    /* 필요하다면 line-height 등도 조정할 수 있습니다. */
+}
+
+
 /* (이하 기존 CSS 내용) */
 
 /* HTML과 Body가 뷰포트 높이를 꽉 채우도록 설정 */
@@ -132,16 +139,13 @@ h1 {
     top: 50%; /* 원통 중앙에 위치하도록 */
     left: 50%;
     transform: translate(-50%, -50%);
-    font-size: 3.75em !important; /* 1.25em * 3 = 3.75em 으로 변경, !important 추가 */
+    font-size: 1.25em; /* 원래 크기로 되돌림 */
     font-weight: bold;
     color: navy;
-    /* opacity는 JS에서 제어 */
     white-space: pre-wrap; /* 줄바꿈 적용 */
     text-align: center;
-    
     width: 90%;
     box-sizing: border-box;
-    
     line-height: 1.3;
     transition: opacity 0.2s ease-out; /* 부드러운 전환 효과 추가 */
 }
@@ -256,7 +260,10 @@ button:hover {
     }
 
     .message-area {
-        font-size: 3em !important; /* 모바일에서도 3배 커지도록 조정. !important 추가 */
+        font-size: 1.1em; /* 모바일에서도 원래 크기로 되돌림 */
+    }
+    .message-area.big-number { /* 모바일에서도 큰 번호 크기 적용 */
+        font-size: 3em; /* 1.1em * 3 = 3.3em 이지만 여유롭게 3em */
     }
 
     button {
