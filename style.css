@@ -1,11 +1,19 @@
+/* HTML과 Body가 뷰포트 높이를 꽉 채우도록 설정 */
+html, body {
+    height: 100%; /* HTML과 Body의 높이를 100%로 설정 */
+    margin: 0;
+    padding: 0;
+}
+
 body {
     font-family: 'Arial', sans-serif;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    background-color: #f4f4f4;
-    margin: 0;
+    /* 기존 중앙 정렬 속성 제거 */
+    /* display: flex; */
+    /* justify-content: center; */
+    /* align-items: center; */
+    /* min-height: 100vh; -> height: 100% 또는 min-height: 100%로 변경 */
+    min-height: 100%; /* 뷰포트 높이를 꽉 채우면서 스크롤 가능하게 */
+    background-color: #f4f4f4; /* 연한 그레이 색상 (기존과 동일하지만, 변경 가능) */
     overflow-x: hidden; /* 가로 스크롤 방지 */
 }
 
@@ -18,6 +26,10 @@ body {
     width: 90%;
     max-width: 450px;
     box-sizing: border-box;
+    /* 상단 여백을 없애거나 최소화 */
+    margin: 0 auto; /* 좌우 중앙 정렬은 유지 */
+    margin-top: 20px; /* 상단에 약간의 여백을 주어 너무 붙지 않게 조정 (필요에 따라 0으로 변경 가능) */
+    margin-bottom: 20px; /* 하단 여백 추가 (필요에 따라 0으로 변경 가능) */
 }
 
 h1 {
@@ -105,7 +117,6 @@ h1 {
     top: 50%; /* 원통 중앙에 위치하도록 */
     left: 50%;
     transform: translate(-50%, -50%);
-    /* font-size를 약간 줄여서 두 줄에 들어갈 공간 확보 */
     font-size: 1.25em; /* 1.3em에서 약간 줄임 */
     font-weight: bold;
     color: navy;
@@ -119,15 +130,6 @@ h1 {
     
     line-height: 1.3; /* 줄 간격을 약간 줄여서 두 줄에 보기 좋게 만듦 */
 }
-
-/* 메시지 전체에 적용되는 페이드 인 애니메이션 (더 이상 사용되지 않음) */
-/*
-@keyframes fadeInMessage {
-    0% { opacity: 0; }
-    100% { opacity: 1; }
-}
-*/
-
 
 .button-group {
     display: flex;
@@ -210,6 +212,8 @@ button:hover {
     .container {
         padding: 15px;
         width: 95%;
+        margin-top: 10px; /* 모바일에서 상단 여백을 조금 더 줄임 */
+        margin-bottom: 10px; /* 모바일에서 하단 여백을 조금 더 줄임 */
     }
 
     h1 {
@@ -234,7 +238,7 @@ button:hover {
     }
 
     .message-area {
-        font-size: 1.1em; /* 작은 화면에서 폰트 크기 조정 */
+        font-size: 1.1em;
     }
 
     button {
