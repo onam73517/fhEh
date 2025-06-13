@@ -11,8 +11,43 @@ document.addEventListener('DOMContentLoaded', () => {
     const animationDuration = 800; // 공 애니메이션 총 시간 (0.8초)
     const intervalBetweenBalls = 600; // 공이 나오는 간격 (0.6초)
 
+    // SpeechSynthesis API 관련 변수
+    let synth;
+    let koreanVoice;
+
     // 초기 UI 상태 설정
     initializeUI();
+
+    // 음성 합성이 지원되는지 확인하고 한국어 음성을 로드
+    if ('speechSynthesis' in window) {
+        synth = window.speechSynthesis;
+        // 음성 목록이 로드될 때까지 기다림
+        synth.onvoiceschanged = () => {
+            const voices = synth.getVoices();
+            // 한국어 음성 (ko-KR)을 찾아서 설정. 'Google 한국의' 또는 'Yuna' 등이 있을 수 있음.
+            koreanVoice = voices.find(voice => voice.lang === 'ko-KR' || voice.lang === 'ko_KR');
+            // 만약 특정 음성을 찾지 못하면, 첫 번째 한국어 음성 사용 시도
+            if (!koreanVoice) {
+                koreanVoice = voices.find(voice => voice.lang.startsWith('ko'));
+            }
+            if (!koreanVoice) {
+                console.warn("한국어 음성을 찾을 수 없습니다. 기본 음성으로 대체됩니다.");
+            }
+        };
+        // 페이지 로드 시에도 음성 목록을 다시 불러올 수 있도록
+        if (synth.getVoices().length === 0) {
+            synth.onvoiceschanged(); // Chrome 등에서 즉시 호출될 수 있음
+        } else {
+             // 이미 음성이 로드되어 있다면 바로 설정
+            const voices = synth.getVoices();
+            koreanVoice = voices.find(voice => voice.lang === 'ko-KR' || voice.lang === 'ko_KR');
+            if (!koreanVoice) {
+                koreanVoice = voices.find(voice => voice.lang.startsWith('ko'));
+            }
+        }
+    } else {
+        console.warn("이 브라우저는 음성 합성을 지원하지 않습니다.");
+    }
 
     drawBtn.addEventListener('click', startDrawing);
     retryBtn.addEventListener('click', startDrawing);
@@ -31,6 +66,11 @@ document.addEventListener('DOMContentLoaded', () => {
         allAnimatedBalls.forEach(ball => ball.remove());
 
         currentDrawnNumbers = []; // 추첨 번호 배열 초기화
+
+        // 혹시 재생 중인 음성이 있다면 중지
+        if (synth) {
+            synth.cancel();
+        }
     }
 
     function startDrawing() {
@@ -53,6 +93,10 @@ document.addEventListener('DOMContentLoaded', () => {
         function drawNextBall() {
             if (index < numbersToDraw.length) {
                 const number = numbersToDraw[index]; // 랜덤 순서의 번호 사용
+
+                // 번호 읽어주기
+                speakNumber(number);
+
                 const ballElement = createAndAnimateBall(number); // 공 생성 및 애니메이션 시작
 
                 ballElement.addEventListener('animationend', (event) => {
@@ -74,6 +118,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             // 모든 공이 나온 후 최종 메시지 표시 및 버튼 변경
                             drawingTimeout = setTimeout(() => {
                                 showMessage(); // 메시지 내용이 showMessage 함수 내부에 정의됨
+                                speakMessage("진접 직원 여러분, 이 번호로 꼭 당첨되세요!"); // 메시지 읽어주기
                                 retryBtn.style.display = 'block';
                                 luckMessage.style.display = 'block';
                             }, 500); // 메시지 표시 전 약간의 딜레이
@@ -130,11 +175,36 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-
     // 메시지를 애니메이션 없이 두 줄로 표시
     function showMessage() {
         messageArea.style.opacity = 1; // 메시지 영역을 바로 보이게 함
         // 메시지 내용을 직접 설정 (두 줄로)
         messageArea.innerHTML = "진접 직원 여러분<br>이 번호로 꼭 당첨되세요!";
     }
+
+    // 특정 텍스트를 음성으로 읽어주는 함수
+    function speakText(text, lang = 'ko-KR', rate = 1.0, pitch = 1.0) {
+        if (synth && text) {
+            synth.cancel(); // 현재 재생 중인 음성이 있다면 중지
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = lang;
+            utterance.rate = rate;
+            utterance.pitch = pitch;
+            if (koreanVoice) {
+                utterance.voice = koreanVoice;
+            }
+            synth.speak(utterance);
+        }
+    }
+
+    // 번호를 한국어로 읽어주는 함수
+    function speakNumber(number) {
+        speakText(`${number}번!`);
+    }
+
+    // 최종 메시지를 한국어로 읽어주는 함수
+    function speakMessage(message) {
+        speakText(message, 'ko-KR', 1.0, 1.0); // 메시지는 기본 속도로 읽기
+    }
+
 });
