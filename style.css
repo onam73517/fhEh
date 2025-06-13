@@ -9,12 +9,6 @@
     animation: blink 1s infinite; /* 1초 주기로 무한 반복 깜빡임 */
 }
 
-/* 새로 추가: 당첨 번호 표시 시 사용할 큰 글씨 클래스 */
-.message-area.big-number {
-    font-size: 3.75em; /* 1.25em * 3 = 3.75em */
-    /* 필요하다면 line-height 등도 조정할 수 있습니다. */
-}
-
 
 /* (이하 기존 CSS 내용) */
 
@@ -262,9 +256,7 @@ button:hover {
     .message-area {
         font-size: 1.1em; /* 모바일에서도 원래 크기로 되돌림 */
     }
-    .message-area.big-number { /* 모바일에서도 큰 번호 크기 적용 */
-        font-size: 3em; /* 1.1em * 3 = 3.3em 이지만 여유롭게 3em */
-    }
+    /* .message-area.big-number 정의도 제거 */
 
     button {
         padding: 10px 20px;

@@ -55,7 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
         messageArea.textContent = ''; // 메시지 초기화
         messageArea.style.opacity = 0; // 메시지 초기에는 숨김 (명확히)
         messageArea.classList.remove('blinking'); // 깜빡임 클래스 제거
-        messageArea.classList.remove('big-number'); // 큰 숫자 클래스도 제거
+        // messageArea.classList.remove('big-number'); // 이 줄도 제거 (CSS에서 big-number 클래스를 없앴으므로)
 
         // 원통 안에 있을 수 있는 모든 애니메이션 중인 공들을 제거
         const allAnimatedBalls = lottoMachine.querySelectorAll('.ball');
@@ -181,7 +181,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function showMessage() {
         messageArea.style.opacity = 1; 
         messageArea.innerHTML = "진접 직원 여러분<br>이 번호로 꼭 당첨되세요!";
-        messageArea.classList.remove('big-number'); // 혹시 모를 경우를 대비해 클래스 제거
+        // messageArea.classList.remove('big-number'); // 이 줄도 제거 (CSS에서 big-number 클래스를 없앴으므로)
     }
 
     // 특정 텍스트를 음성으로 읽어주는 함수
@@ -235,12 +235,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     () => { // onstart: 번호 읽기 시작 시
                         messageArea.textContent = number; // 원통 중앙에 번호 표시
                         messageArea.style.opacity = 1; // 보이게 함
-                        messageArea.classList.add('big-number'); // 큰 숫자 클래스 추가
+                        // messageArea.classList.add('big-number'); // 이 줄 제거
                     },
                     () => { // onend: 번호 읽기 종료 시
                         messageArea.textContent = ''; // 번호 사라지게 함
                         messageArea.style.opacity = 0; // 투명하게 만듦
-                        messageArea.classList.remove('big-number'); // 큰 숫자 클래스 제거
+                        // messageArea.classList.remove('big-number'); // 이 줄 제거
                         currentNumberIndex++;
                         setTimeout(readNextNumber, 300); // 다음 번호 읽기 (짧은 딜레이)
                     }
